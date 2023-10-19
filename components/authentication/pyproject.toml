@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "authentication"
+version = "0.1.0"
+description = ""
+authors = ["Tyson Gern <tyson@initialcapacity.io>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+requests = "^2.31.0"
+flask = "^3.0.0"
+
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.6.0"
+types-requests = "^2.31.0.10"
+
+
+[tool.poetry.group.test.dependencies]
+test_support = { path = "../test_support", develop = true }
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

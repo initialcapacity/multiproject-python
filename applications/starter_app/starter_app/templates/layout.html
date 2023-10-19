@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{% block title %}{% endblock %}</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Starter starter">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.svg') }}">
+</head>
+
+<body>
+<nav>
+    <a href="/dashboard"><h1>Starter</h1></a>
+    <div class="actions">
+        {% if g.username %}
+        <div class="account-details">
+            <div>{{ g.username }}</div>
+            <div>{{ g.account_name }}</div>
+        </div>
+        <a href="/logout" class="button">sign out</a>
+        {% else %}
+        <a href="/authenticate" class="button">sign in</a>
+        {% endif %}
+    </div>
+</nav>
+{% if g.username %}
+<nav class="secondary">
+    <div class="actions">
+        <a href="/dashboard">Home</a>
+        <a href="/accounts">Accounts</a>
+    </div>
+</nav>
+{% endif %}
+
+{% if fixed_height %}
+<main class="fixed-height">
+{% else %}
+<main>
+{% endif %}
+    {% block body %}{% endblock %}
+</main>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+<ul class=flash-messages>
+    {% for category, message in messages %}
+    <li class="message {{ category }}">{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endwith %}
+
+</body>
+</html>

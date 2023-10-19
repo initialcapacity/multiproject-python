@@ -1,0 +1,8 @@
+.idea
+.mypy_cache
+venv
+dist
+__pycache__
+.DS_Store
+.env
+requirements.txt*

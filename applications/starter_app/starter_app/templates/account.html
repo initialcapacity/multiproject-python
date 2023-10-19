@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+
+{% block title %}Account: {{ account.name }}{% endblock %}
+
+{% block body %}
+
+
+<h1>{{ account.name }}</h1>
+
+<h2>Users</h2>
+<table>
+    <thead>
+    <tr>
+        <th>Email</th>
+        {% if account.owner %}
+        <th>Action</th>
+        {% endif %}
+    </tr>
+    </thead>
+    <tbody>
+    {% for user in users %}
+    <tr>
+        <td>{{ user.email }}</td>
+        {% if account.owner %}
+        <td>
+            {% if user.email != g.username %}
+            <form action="/accounts/{{ account.id }}/members/{{ user.id }}/remove" method="post" class="inline">
+                <button class="button">Remove</button>
+            </form>
+            {% endif %}
+        </td>
+        {% endif %}
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% if account.owner %}
+<h2>Add user</h2>
+<form action="/accounts/{{ account.id }}/members" method="post">
+    <label>
+        Email
+        <input type="email" name="email" required>
+    </label>
+    <button class="button">Add</button>
+</form>
+{% endif %}
+
+{% endblock %}

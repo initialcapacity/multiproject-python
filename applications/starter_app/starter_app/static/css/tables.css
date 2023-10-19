@@ -1,0 +1,13 @@
+table {
+    margin-bottom: 2rem;
+}
+
+th {
+    font-weight: 700;
+}
+
+td, th {
+    text-align: left;
+    padding: .5rem .75rem;
+    border: 1px solid var(--table-border-color);
+}

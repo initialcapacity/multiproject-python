@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "starter_app"
+version = "0.1.0"
+description = ""
+authors = ["Tyson Gern <tyson@initialcapacity.io>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+flask = "^3.0.0"
+gunicorn = "^21.2.0"
+requests = "^2.31.0"
+sqlalchemy = "^2.0.22"
+authentication = { path = "../../components/authentication", develop = true }
+accounts = { path = "../../components/accounts", develop = true }
+psycopg2-binary = "^2.9.9"
+
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.6.0"
+types-requests = "^2.31.0.10"
+
+
+[tool.poetry.group.test.dependencies]
+test_support = { path = "../../components/test_support", develop = true }
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

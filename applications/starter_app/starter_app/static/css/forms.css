@@ -1,0 +1,39 @@
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+form:not(.inline) {
+    margin-bottom: 2rem;
+}
+
+form button {
+    align-self: flex-start;
+}
+
+input {
+    align-self: flex-start;
+    padding: .5rem;
+    background-color: var(--background-color);
+    border-color: var(--border-color);
+    border-style: solid;
+    color: var(--text-color);
+    font-size: 1rem;
+}
+
+input.wide {
+    flex: 1;
+}
+
+label {
+    display: flex;
+    gap: .35rem;
+    flex-direction: column;
+}
+
+fieldset.inline {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}

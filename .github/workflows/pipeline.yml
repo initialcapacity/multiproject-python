@@ -1,0 +1,114 @@
+name: deploy
+on:
+  push:
+    branches:
+      - main
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgresql
+          POSTGRES_PASSWORD: postgresql
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+      - name: 'Checkout repo'
+        uses: actions/checkout@v3
+      - uses: ./.github/actions/install-python
+      - name: 'Install psql'
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-client
+      - name: 'Prepare test database'
+        run: |
+          psql --host localhost --username postgresql < databases/drop_and_create_databases.sql
+          poetry run alembic upgrade head
+        env:
+          PGPASSWORD: postgresql
+          DATABASE_URL: 'postgresql://localhost:5432/starter_test?user=starter&password=starter'
+      - name: 'Check formatting, types, and run tests'
+        shell: bash
+        run: |
+          make check
+          make test
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [ test ]
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - name: 'Checkout repo'
+        uses: actions/checkout@v3
+      - uses: ./.github/actions/install-python
+      - uses: google-github-actions/setup-gcloud@v1
+      - uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: "${{ secrets.GOOGLE_FEDERATION_WORKLOAD_IDENTITY_PROVIDER }}"
+          service_account: "${{ secrets.GOOGLE_FEDERATION_SERVICE_ACCOUNT }}"
+      - name: 'Build docker container'
+        shell: bash
+        run: |
+          sudo add-apt-repository ppa:cncf-buildpacks/pack-cli
+          sudo apt-get update
+          sudo apt-get install -y pack-cli
+          pack build us-central1-docker.pkg.dev/${{ secrets.GOOGLE_PROJECT_ID }}/multiproject-python/starter-app:${{ github.sha }} --builder=gcr.io/buildpacks/builder:v1
+          gcloud auth configure-docker us-central1-docker.pkg.dev
+          docker push us-central1-docker.pkg.dev/${{ secrets.GOOGLE_PROJECT_ID }}/multiproject-python/starter-app:${{ github.sha }}
+
+  migrate-starter-db:
+    runs-on: ubuntu-latest
+    needs: [ build ]
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/install-python
+      - uses: google-github-actions/setup-gcloud@v1
+      - uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: "${{ secrets.GOOGLE_FEDERATION_WORKLOAD_IDENTITY_PROVIDER }}"
+          service_account: "${{ secrets.GOOGLE_FEDERATION_SERVICE_ACCOUNT }}"
+      - name: cloud-sql-proxy
+        run: |
+          curl https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.0.0-preview.0/cloud-sql-proxy.linux.amd64 --output cloud-sql-proxy
+          chmod +x cloud-sql-proxy
+          sudo mv cloud-sql-proxy /usr/bin/cloud-sql-proxy
+      - name: migrate
+        env:
+          DATABASE_URL: ${{ secrets.REVIEW_DATABASE_URL }}
+        run: |
+          cloud-sql-proxy --port 6000 ${{ secrets.GOOGLE_PROJECT_ID }}:us-central1:multiproject-python &
+          sleep 6
+          poetry run alembic upgrade head
+
+  deploy-starter-app:
+    runs-on: ubuntu-latest
+    needs: [ migrate-starter-db ]
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - uses: actions/checkout@v3
+      - uses: google-github-actions/setup-gcloud@v1
+      - uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: "${{ secrets.GOOGLE_FEDERATION_WORKLOAD_IDENTITY_PROVIDER }}"
+          service_account: "${{ secrets.GOOGLE_FEDERATION_SERVICE_ACCOUNT }}"
+      - name: deploy
+        run: |-
+          gcloud run deploy starter-app \
+            --image us-central1-docker.pkg.dev/${{ secrets.GOOGLE_PROJECT_ID }}/multiproject-python/starter-app:${{ github.sha }} \
+            --region us-central1 \
+            --platform managed

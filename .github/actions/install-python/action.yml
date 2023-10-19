@@ -1,0 +1,22 @@
+name: "install python dependencies"
+description: "install python dependencies"
+runs:
+  using: composite
+  steps:
+    - name: 'Install Poetry'
+      shell: bash
+      run: pipx install poetry
+    - name: 'Install Python'
+      uses: actions/setup-python@v4
+      with:
+        python-version-file: '.python-version'
+        cache: 'poetry'
+    - name: 'Install Poetry dependencies'
+      shell: bash
+      run: |
+        make install
+        pushd applications/starter_app
+          poetry install
+          poetry export --without-hashes -f requirements.txt > ../../requirements.txt
+        popd
+        sed -i "s?$(pwd)?/workspace?" requirements.txt

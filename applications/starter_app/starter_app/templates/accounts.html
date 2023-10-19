@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+{% block title %}Accounts{% endblock %}
+
+{% block body %}
+
+
+<h1>Accounts</h1>
+
+<table>
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Role</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for account in accounts %}
+    <tr>
+        <td><a href="/accounts/{{ account.id }}">{{ account.name }}</a></td>
+        <td>
+            {% if account.owner %}
+            owner
+            {% else %}
+            member
+            {% endif %}
+        </td>
+        <td>
+            {% if g.account_id != account.id %}
+            <form action="/accounts/{{ account.id }}/switch" method="POST" class="inline">
+                <button class="button">Switch</button>
+            </form>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block title %}Starter app{% endblock %}
+
+{% block body %}
+<form action="/chat" method="post">
+    <fieldset class="inline">
+        <label for="query">
+            What would you like to know?
+        </label>
+        <input type="text" name="query" id="query" class="wide">
+        <button type="submit" class="button">Ask</button>
+    </fieldset>
+</form>
+{% endblock %}

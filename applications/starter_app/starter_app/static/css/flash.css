@@ -1,0 +1,44 @@
+.flash-messages {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.flash-messages .message {
+    padding: 1rem 1.5rem;
+    color: var(--flash-text-color);
+    background-color: var(--success-background-color);
+
+    animation: hideMessage .25s ease-in 5s;
+    animation-fill-mode: forwards;
+}
+
+.flash-messages .message.error {
+    background-color: var(--error-background-color);
+}
+
+.flash-messages .message.alert {
+    background-color: var(--alert-background-color);
+}
+
+@keyframes hideMessage {
+    0% {
+        opacity: 1;
+        height: auto;
+    }
+
+    99% {
+        opacity: 0;
+        height: auto;
+    }
+
+    100% {
+        visibility: hidden;
+        opacity: 0;
+        height: 0;
+    }
+}
