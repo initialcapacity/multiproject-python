@@ -17,6 +17,7 @@ types-requests = "^2.31.0.10"
 
 [tool.poetry.group.test.dependencies]
 test_support = { path = "../test_support", develop = true }
+responses = "^0.23.3"
 
 [build-system]
 requires = ["poetry-core"]

@@ -1,16 +1,16 @@
 # Multi-project Python
 
 ## Local development
-1. Install Python and Poetry
+1. Install PostgreSQL, Python and Poetry
     ```shell
-    brew install pyenv
+    brew install postgresql@15 pyenv
     pyenv install 3.10
     # Add pyenv to the path
     pyenv shell 3.10
     curl -sSL https://install.python-poetry.org | python3 -
     ```
 
-1. Install dependencies
+1. Install Python dependencies
 
     ```shell
     make install
@@ -19,44 +19,32 @@
 1. Set up database
 
     ```shell
-    psql postgres < databases/drop_and_create_databases.sql
-    poetry run alembic upgrade head
-    DATABASE_URL='postgresql://localhost:5432/starter_test?user=starter&password=starter' poetry run alembic upgrade head
+    make db/reset migrate
     ```
 
-1. Add a migration
-
-    ```shell
-    poetry run alembic revision -m "description"
-    ```
-
-1. Check types and run tests
+1. Verify types and run tests
 
     ```shell
     make test
     ```
 
-1. Check PEP-8 compliance and formatting code
+1. Check PEP-8 compliance and code format
 
     ```shell
     make check
     ```
 
-1. Reformat code
+1. Configure environment variables
 
     ```shell
-    make format
+    cp .env.example .env
+    vi .env
     ```
-
-1. Configure .env
-  - copy `.env.example` to `.env`
 
 1. Run app
 
     ```shell
-    source .env
-    cd applications/starter_app
-    poetry run python -m starter_app
+    make run
     ```
 
 ## PyCharm setup

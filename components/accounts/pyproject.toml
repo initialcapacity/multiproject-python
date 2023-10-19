@@ -16,6 +16,7 @@ mypy = "^1.6.0"
 
 [tool.poetry.group.test.dependencies]
 test_support = { path = "../test_support", develop = true }
+psycopg2-binary = "^2.9.9"
 
 
 [build-system]

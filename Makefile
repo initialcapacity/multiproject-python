@@ -26,6 +26,9 @@ test:
 			echo "running tests in $$directory"; \
 	    	poetry run mypy --strict `basename $$directory` tests; \
 			poetry run python -m unittest; \
+		else \
+			echo "checking types in $$directory"; \
+	    	poetry run mypy --strict `basename $$directory`; \
 		fi; \
 		popd > /dev/null; \
 	done
@@ -38,6 +41,21 @@ check:
 .PHONY .SILENT: format
 format:
 	poetry run black .;
+
+.PHONY .SILENT: db/reset
+db/reset:
+	psql postgres < databases/drop_and_create_databases.sql
+
+.PHONY .SILENT: migrate/development
+migrate/development:
+	poetry run alembic upgrade head
+
+.PHONY .SILENT: migrate/test
+migrate/test:
+	DATABASE_URL='postgresql://localhost:5432/starter_test?user=starter&password=starter' poetry run alembic upgrade head
+
+.PHONY .SILENT: migrate
+migrate: migrate/development migrate/test
 
 .PHONY .SILENT: run
 run:

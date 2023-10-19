@@ -7,6 +7,7 @@ authors = ["Tyson Gern <tyson@initialcapacity.io>"]
 [tool.poetry.dependencies]
 python = "^3.10"
 flask = "^3.0.0"
+database_support = { path = "../database_support", develop = true }
 
 
 [tool.poetry.group.dev.dependencies]
