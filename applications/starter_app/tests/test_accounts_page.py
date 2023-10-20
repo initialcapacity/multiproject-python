@@ -5,16 +5,10 @@ from flask import session
 from accounts.accounts_gateway import AccountsGateway
 from accounts.accounts_service import AccountsService
 from accounts.memberships_gateway import MembershipsGateway
-from accounts.random_name_generator import RandomNameGenerator
 from accounts.users_gateway import UsersGateway
 from starter_app.accounts_page import accounts_page
 from test_support.db_template import test_db_template
 from tests.blueprint_test_support import test_client, log_in
-
-
-class TestNameGenerator(RandomNameGenerator):
-    def next(self) -> str:
-        return "some account name"
 
 
 class TestAccountsPage(TestCase):
@@ -30,7 +24,6 @@ class TestAccountsPage(TestCase):
             accounts_gateway=accounts_gateway,
             users_gateway=users_gateway,
             memberships_gateway=memberships_gateway,
-            name_generator=TestNameGenerator(),
         )
         self.accounts_page = accounts_page(
             accounts_gateway, users_gateway, accounts_service

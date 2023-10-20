@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, cast, Union, List
+from typing import Optional, cast, List
 from uuid import UUID
 
 from sqlalchemy import Connection
@@ -20,7 +20,7 @@ class UsersGateway:
 
     def create(
         self, email: str, connection: Optional[Connection] = None
-    ) -> Union[None, UserRecord]:
+    ) -> Optional[UserRecord]:
         result = self.__db.query(
             statement="""insert into users (email) values (:email) returning id, email""",
             connection=connection,
@@ -37,7 +37,7 @@ class UsersGateway:
 
     def find_by_email(
         self, email: str, connection: Optional[Connection] = None
-    ) -> Union[None, UserRecord]:
+    ) -> Optional[UserRecord]:
         result = self.__db.query(
             statement="""select id, email from users where email = :email""",
             connection=connection,

@@ -57,6 +57,11 @@ def oauth_api(
 
         session["user_id"] = user.id
         session["username"] = user.email
+
+        if user.account_id is None or user.account_name is None:
+            flash(f"Welcome {user.email}, please create an account", "success")
+            return redirect("/accounts/new")
+
         session["account_name"] = user.account_name
         session["account_id"] = user.account_id
 

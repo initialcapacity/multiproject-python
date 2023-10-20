@@ -29,6 +29,18 @@ class TestDatabaseTemplate(DatabaseTemplate):
             ),
         )
 
+    def user(self, email: str) -> UUID:
+        return cast(
+            UUID,
+            map_one_result(
+                self.query(
+                    statement="""insert into users (email) values (:email) returning id, email""",
+                    email=email,
+                ),
+                lambda row: row["id"],
+            ),
+        )
+
     def account_with_user(
         self, email: str, account_name: str, owner: bool = True
     ) -> Tuple[UUID, UUID]:

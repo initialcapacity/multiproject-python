@@ -4,7 +4,6 @@ from flask import Flask
 from accounts.accounts_gateway import AccountsGateway
 from accounts.accounts_service import AccountsService
 from accounts.memberships_gateway import MembershipsGateway
-from accounts.random_name_generator import RandomNameGenerator
 from accounts.users_gateway import UsersGateway
 from authentication.allowed_emails import AllowedEmails
 from authentication.oauth_client import OAuthClient
@@ -14,12 +13,11 @@ from starter_app.dashboard_page import dashboard_page
 from starter_app.environment import Environment
 from starter_app.health_api import health_api
 from starter_app.index_page import index_page
+from starter_app.new_account_page import new_account_page
 from starter_app.oauth_api import oauth_api
 
 
 def create_app(env: Environment = Environment.from_env()) -> Flask:
-    app = Flask(__name__)
-
     app = Flask(__name__)
     app.secret_key = env.secret_key
 
@@ -39,7 +37,6 @@ def create_app(env: Environment = Environment.from_env()) -> Flask:
         accounts_gateway=accounts_gateway,
         users_gateway=users_gateway,
         memberships_gateway=MembershipsGateway(db_template),
-        name_generator=RandomNameGenerator(),
     )
 
     app.register_blueprint(index_page())
@@ -48,6 +45,7 @@ def create_app(env: Environment = Environment.from_env()) -> Flask:
     app.register_blueprint(
         accounts_page(accounts_gateway, users_gateway, accounts_service)
     )
+    app.register_blueprint(new_account_page(accounts_service))
 
     app.register_blueprint(health_api())
 

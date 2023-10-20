@@ -22,3 +22,12 @@ def log_in(
         session["username"] = "test@example.com"
         session["account_name"] = "some account"
         session["account_id"] = account_id
+
+
+def log_in_user(
+    client: FlaskClient,
+    user_id: UUID = UUID("aaaa77eb-83ce-4b3d-9c7e-42559bd10834"),
+) -> None:
+    with client.session_transaction() as session:
+        session["user_id"] = user_id
+        session["username"] = "test@example.com"

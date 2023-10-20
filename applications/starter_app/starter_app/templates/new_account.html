@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block title %}Create account{% endblock %}
+
+{% block body %}
+
+
+<h1>Create account</h1>
+<form action="/accounts" method="post">
+    <label>
+        Name
+        <input type="text" name="name" required>
+    </label>
+    <button class="button">Create</button>
+</form>
+
+{% endblock %}
