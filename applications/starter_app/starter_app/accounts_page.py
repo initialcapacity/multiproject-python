@@ -54,7 +54,7 @@ def accounts_page(
         email = request.form["email"]
         success = accounts_service.add_to_account(email=email, account_id=account_id)
         if not success:
-            flash("User not found", "error")
+            flash(f"Unable to add user {email} to account {account.name}", "error")
 
         return redirect(f"/accounts/{account_id}")
 

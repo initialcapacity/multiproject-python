@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from typing import Optional
 from uuid import UUID
 
+from sqlalchemy import Connection
+
 from accounts.accounts_gateway import AccountsGateway, AccountRecord
 from accounts.memberships_gateway import MembershipsGateway
 from accounts.users_gateway import UsersGateway, UserRecord
@@ -30,25 +32,26 @@ class AccountsService:
         self.memberships_gateway = memberships_gateway
 
     def create_or_find_user(self, email: str) -> Optional[UserAccount]:
-        record = self.__maybe_create_user(email=email)
-        if record is None:
-            return None
+        with self.db.begin() as connection:
+            record = self.__create_or_find_user(email=email, connection=connection)
+            if record is None:
+                return None
 
-        accounts = self.accounts_gateway.list_for_user(record.id)
-        if len(accounts) == 0:
+            accounts = self.accounts_gateway.list_for_user(record.id, connection)
+            if len(accounts) == 0:
+                return UserAccount(
+                    id=record.id,
+                    email=record.email,
+                    account_id=None,
+                    account_name=None,
+                )
+
             return UserAccount(
                 id=record.id,
                 email=record.email,
-                account_id=None,
-                account_name=None,
+                account_id=accounts[0].id,
+                account_name=accounts[0].name,
             )
-
-        return UserAccount(
-            id=record.id,
-            email=record.email,
-            account_id=accounts[0].id,
-            account_name=accounts[0].name,
-        )
 
     def create_account(
         self, user_id: UUID, account_name: str
@@ -72,12 +75,15 @@ class AccountsService:
 
     def add_to_account(self, email: str, account_id: UUID) -> bool:
         with self.db.begin() as connection:
-            user = self.users_gateway.find_by_email(email, connection)
+            user = self.__create_or_find_user(email, connection)
             if user is None:
                 return False
 
             membership_id = self.memberships_gateway.create(
-                account_id=account_id, user_id=user.id, owner=False
+                account_id=account_id,
+                user_id=user.id,
+                owner=False,
+                connection=connection,
             )
 
             return membership_id is not None
@@ -85,12 +91,13 @@ class AccountsService:
     def remove_from_account(self, user_id: UUID, account_id: UUID) -> None:
         self.memberships_gateway.delete(account_id=account_id, user_id=user_id)
 
-    def __maybe_create_user(self, email: str) -> Optional[UserRecord]:
-        with self.db.begin() as connection:
-            user_record = self.users_gateway.find_by_email(
-                email=email, connection=connection
-            )
-            if user_record is not None:
-                return user_record
+    def __create_or_find_user(
+        self, email: str, connection: Connection
+    ) -> Optional[UserRecord]:
+        user_record = self.users_gateway.find_by_email(
+            email=email, connection=connection
+        )
+        if user_record is not None:
+            return user_record
 
-            return self.users_gateway.create(email=email, connection=connection)
+        return self.users_gateway.create(email=email, connection=connection)

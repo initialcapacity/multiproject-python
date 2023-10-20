@@ -59,7 +59,6 @@ class TestAccountsService(TestCase):
         success = self.service.add_to_account("other@example.com", account.id)
 
         self.assertTrue(success)
-
         self.assertEqual(
             [{"owner": False}],
             self.db.query_to_dict(
@@ -77,16 +76,20 @@ class TestAccountsService(TestCase):
 
         success = self.service.add_to_account("other@example.com", account.id)
 
-        self.assertFalse(success)
-
+        self.assertTrue(success)
+        self.assertEqual(
+            2,
+            len(
+                self.db.query_to_dict(
+                    f"""select owner from memberships where account_id = '{account.id}'"""
+                )
+            ),
+        )
         self.assertEqual(
             1,
             len(
                 self.db.query_to_dict(
-                    f"""
-            select owner from memberships
-                where account_id = '{account.id}'
-        """
+                    """select id from users where email = 'other@example.com'"""
                 )
             ),
         )
